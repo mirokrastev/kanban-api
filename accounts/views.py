@@ -1,9 +1,8 @@
+from rest_framework import status
 from rest_framework.generics import CreateAPIView
 from rest_framework.response import Response
-from rest_framework import status
 
-from accounts import models
-from accounts import serializers
+from accounts import models, serializers
 
 
 class RegisterView(CreateAPIView):
@@ -15,4 +14,4 @@ class RegisterView(CreateAPIView):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         self.perform_create(serializer)
-        return Response({'status': 'OK'}, status=status.HTTP_201_CREATED)
+        return Response({"status": "OK"}, status=status.HTTP_201_CREATED)

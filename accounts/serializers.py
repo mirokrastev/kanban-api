@@ -1,5 +1,5 @@
-from rest_framework import serializers
 from django.contrib.auth.password_validation import validate_password
+from rest_framework import serializers
 
 from accounts.models import BaseUser
 
@@ -17,4 +17,4 @@ class UserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = BaseUser
-        fields = ('id', 'username', 'email', 'first_name', 'last_name', 'password')
+        fields = ("id", "username", "email", "first_name", "last_name", "password")
