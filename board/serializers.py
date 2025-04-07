@@ -4,12 +4,6 @@ from accounts.serializers import UserSerializer
 from board.models import Board, Card, CardComment, Column
 
 
-class ColumnSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Column
-        fields = ["id", "name", "order", "created_at", "updated_at"]
-
-
 class CardSerializer(serializers.ModelSerializer):
     owner = UserSerializer(read_only=True)
 
@@ -25,6 +19,14 @@ class CardSerializer(serializers.ModelSerializer):
             "created_at",
             "updated_at",
         ]
+
+
+class ColumnSerializer(serializers.ModelSerializer):
+    cards = CardSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = Column
+        fields = ["id", "name", "order", "created_at", "updated_at", "cards"]
 
 
 class CardCommentSerializer(serializers.ModelSerializer):
