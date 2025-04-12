@@ -25,8 +25,6 @@ class BoardViewSet(viewsets.ModelViewSet):
 class ColumnViewSet(viewsets.ModelViewSet):
     queryset = Column.objects.prefetch_related("cards")
     serializer_class = ColumnSerializer
-    authentication_classes = ()
-    permission_classes = ()
 
     def get_queryset(self):
         return Column.objects.filter(board_id=self.kwargs["board_pk"])
@@ -52,7 +50,7 @@ class CardViewSet(viewsets.ModelViewSet):
         return Card.objects.filter(column_id=self.kwargs["column_pk"])
 
     def perform_create(self, serializer):
-        serializer.save(owner=self.request.user)
+        serializer.save(owner=self.request.user, column_id=self.kwargs["column_pk"])
 
     @action(detail=True, methods=["post"])
     def reorder(self, request, column_pk, pk=None):
