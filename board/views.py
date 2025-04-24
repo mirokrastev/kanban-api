@@ -1,5 +1,10 @@
 from rest_framework import permissions, viewsets
 from rest_framework.decorators import action
+from rest_framework.mixins import (
+    DestroyModelMixin,
+    RetrieveModelMixin,
+    UpdateModelMixin,
+)
 from rest_framework.response import Response
 
 from board.models import Board, Card, CardComment, Column
@@ -42,12 +47,16 @@ class ColumnViewSet(viewsets.ModelViewSet):
         return Response(self.get_serializer(column).data)
 
 
-class CardViewSet(viewsets.ModelViewSet):
-    queryset = Card.objects.all()
+class CardViewSet(
+    RetrieveModelMixin,
+    UpdateModelMixin,
+    DestroyModelMixin,
+    viewsets.GenericViewSet,
+):
     serializer_class = CardSerializer
 
     def get_queryset(self):
-        return Card.objects.filter(column_id=self.kwargs["column_pk"])
+        return Card.objects.select_related("owner").filter(owner=self.request.user)
 
     def perform_create(self, serializer):
         serializer.save(owner=self.request.user, column_id=self.kwargs["column_pk"])
