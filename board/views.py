@@ -1,6 +1,7 @@
 from rest_framework import permissions, viewsets
 from rest_framework.decorators import action
 from rest_framework.mixins import (
+    CreateModelMixin,
     DestroyModelMixin,
     RetrieveModelMixin,
     UpdateModelMixin,
@@ -48,6 +49,7 @@ class ColumnViewSet(viewsets.ModelViewSet):
 
 
 class CardViewSet(
+    CreateModelMixin,
     RetrieveModelMixin,
     UpdateModelMixin,
     DestroyModelMixin,
@@ -59,7 +61,7 @@ class CardViewSet(
         return Card.objects.select_related("owner").filter(owner=self.request.user)
 
     def perform_create(self, serializer):
-        serializer.save(owner=self.request.user, column_id=self.kwargs["column_pk"])
+        serializer.save(owner=self.request.user)
 
     @action(detail=True, methods=["post"])
     def reorder(self, request, column_pk, pk=None):

@@ -6,15 +6,19 @@ from board.models import Board, Card, CardComment, Column
 
 class CardSerializer(serializers.ModelSerializer):
     owner = UserSerializer(read_only=True)
+    column_id = serializers.PrimaryKeyRelatedField(
+        source="column", write_only=True, required=False, queryset=Column.objects.all()
+    )
 
     class Meta:
         model = Card
         fields = [
             "id",
-            "name",
+            "title",
             "description",
             "slug",
             "order",
+            "column_id",
             "owner",
             "created_at",
             "updated_at",
@@ -26,7 +30,7 @@ class ColumnSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Column
-        fields = ["id", "name", "order", "created_at", "updated_at", "cards"]
+        fields = ["id", "title", "order", "created_at", "updated_at", "cards"]
 
 
 class CardCommentSerializer(serializers.ModelSerializer):
@@ -45,7 +49,7 @@ class BoardSerializer(serializers.ModelSerializer):
         model = Board
         fields = [
             "id",
-            "name",
+            "title",
             "description",
             "slug",
             "owner",
