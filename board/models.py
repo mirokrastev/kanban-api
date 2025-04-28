@@ -24,6 +24,9 @@ class Column(BaseModel):
     def __str__(self):
         return self.title
 
+    class Meta:
+        ordering = ["order"]
+
 
 class Card(BaseModel):
     title = models.CharField(max_length=255)
@@ -37,14 +40,5 @@ class Card(BaseModel):
     def __str__(self):
         return self.title
 
-
-class CardComment(BaseModel):
-    comment = models.TextField()
-
-    card = models.ForeignKey(Card, on_delete=models.CASCADE, related_name="comments")
-    owner = models.ForeignKey(
-        BaseUser, on_delete=models.CASCADE, related_name="comments"
-    )
-
-    def __str__(self):
-        return self.comment
+    class Meta:
+        ordering = ["order"]

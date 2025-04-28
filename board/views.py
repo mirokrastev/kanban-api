@@ -1,4 +1,4 @@
-from rest_framework import permissions, viewsets
+from rest_framework import viewsets
 from rest_framework.decorators import action
 from rest_framework.mixins import (
     CreateModelMixin,
@@ -8,10 +8,9 @@ from rest_framework.mixins import (
 )
 from rest_framework.response import Response
 
-from board.models import Board, Card, CardComment, Column
+from board.models import Board, Card, Column
 from board.serializers import (
     BoardSerializer,
-    CardCommentSerializer,
     CardSerializer,
     ColumnSerializer,
 )
@@ -27,6 +26,23 @@ class BoardViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         serializer.save(owner=self.request.user)
 
+    @action(detail=True, methods=["post"])
+    def columns_reorder(self, request, *args, **kwargs):
+        ids = self.request.data.get("ids", [])
+
+        id_order_map = {_id: inx for inx, _id in enumerate(ids)}
+
+        board = self.get_object()
+        columns = Column.objects.filter(board=board, id__in=ids)
+
+        for column in columns:
+            if column.id in id_order_map:
+                column.order = id_order_map[column.id]
+
+        Column.objects.bulk_update(columns, fields=["order"])
+
+        return Response()
+
 
 class ColumnViewSet(viewsets.ModelViewSet):
     queryset = Column.objects.prefetch_related("cards")
@@ -39,13 +55,21 @@ class ColumnViewSet(viewsets.ModelViewSet):
         serializer.save(board_id=self.kwargs["board_pk"])
 
     @action(detail=True, methods=["post"])
-    def reorder(self, request, board_pk, pk=None):
+    def cards_reorder(self, request, *args, **kwargs):
+        ids = self.request.data.get("ids", [])
+
+        id_order_map = {_id: inx for inx, _id in enumerate(ids)}
+
         column = self.get_object()
-        new_order = request.data.get("order")
-        if new_order is not None:
-            column.order = new_order
-            column.save()
-        return Response(self.get_serializer(column).data)
+        cards = Card.objects.filter(column=column, id__in=ids)
+
+        for card in cards:
+            if card.id in id_order_map:
+                card.order = id_order_map[card.id]
+
+        Card.objects.bulk_update(cards, fields=["order"])
+
+        return Response()
 
 
 class CardViewSet(
@@ -59,26 +83,6 @@ class CardViewSet(
 
     def get_queryset(self):
         return Card.objects.select_related("owner").filter(owner=self.request.user)
-
-    def perform_create(self, serializer):
-        serializer.save(owner=self.request.user)
-
-    @action(detail=True, methods=["post"])
-    def reorder(self, request, column_pk, pk=None):
-        card = self.get_object()
-        new_order = request.data.get("order")
-        if new_order is not None:
-            card.order = new_order
-            card.save()
-        return Response(self.get_serializer(card).data)
-
-
-class CardCommentViewSet(viewsets.ModelViewSet):
-    serializer_class = CardCommentSerializer
-    permission_classes = [permissions.IsAuthenticated]
-
-    def get_queryset(self):
-        return CardComment.objects.filter(card_id=self.kwargs["card_pk"])
 
     def perform_create(self, serializer):
         serializer.save(owner=self.request.user)

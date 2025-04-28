@@ -1,7 +1,7 @@
 from rest_framework import serializers
 
 from accounts.serializers import UserSerializer
-from board.models import Board, Card, CardComment, Column
+from board.models import Board, Card, Column
 
 
 class CardSerializer(serializers.ModelSerializer):
@@ -31,14 +31,6 @@ class ColumnSerializer(serializers.ModelSerializer):
     class Meta:
         model = Column
         fields = ["id", "title", "order", "created_at", "updated_at", "cards"]
-
-
-class CardCommentSerializer(serializers.ModelSerializer):
-    owner = UserSerializer(read_only=True)
-
-    class Meta:
-        model = CardComment
-        fields = ["id", "comment", "owner", "created_at", "updated_at"]
 
 
 class BoardSerializer(serializers.ModelSerializer):
